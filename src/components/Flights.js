@@ -1,43 +1,55 @@
 import React, { useEffect, useState } from "react";
+import PaymentModal from "./PaymentModal";
 
-const Flights = ({ searchTerm }) => {
+const Flights = () => {
   const [flights, setFlights] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [selectedFlight, setSelectedFlight] = useState(null);
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_URL}/flights`)
       .then((res) => res.json())
-      .then((data) => {
-        setFlights(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
+      .then((data) => setFlights(data))
+      .catch((err) => console.error(err));
   }, []);
 
-  const filteredFlights = flights.filter((f) =>
-    f.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    f.airline.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredFlights = flights.filter((flight) =>
+    flight.destination.toLowerCase().includes(search.toLowerCase())
   );
 
-  if (loading) return <p>Loading flights...</p>;
-
   return (
-    <div className="flights-container">
-      {filteredFlights.length > 0 ? (
-        filteredFlights.map((flight) => (
+    <div className="section-container active fade-in">
+      <h2 className="section-title">Book Your Flight</h2>
+
+      <div className="search-bar">
+        <input
+          type="text"
+          placeholder="Search flights by destination..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <button>Search</button>
+      </div>
+
+      <div className="cards-grid">
+        {filteredFlights.map((flight) => (
           <div className="card" key={flight.id}>
-            <img src={flight.imageUrl} alt={flight.airline} />
-            <h3>{flight.airline}</h3>
-            <p>Destination: {flight.destination}</p>
-            <p>Price: ${flight.price}</p>
-            <button>Book Flight</button>
+            <img src={flight.imageUrl} alt={flight.destination} />
+            <h3>{flight.destination}</h3>
+            <p>{flight.description}</p>
+            <p>
+              <strong>Price:</strong> ${flight.price}
+            </p>
+            <button onClick={() => setSelectedFlight(flight)}>Book Flight</button>
           </div>
-        ))
-      ) : (
-        <p>No flights found matching "{searchTerm}"</p>
+        ))}
+      </div>
+
+      {selectedFlight && (
+        <PaymentModal
+          item={selectedFlight}
+          onClose={() => setSelectedFlight(null)}
+        />
       )}
     </div>
   );

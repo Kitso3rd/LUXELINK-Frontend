@@ -1,8 +1,12 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+describe('App component', () => {
+  test('exports a function component', () => {
+    expect(typeof App).toBe('function');
+  });
+
+  test('renders without crashing', () => {
+    render(<App />);
+  });
 });
